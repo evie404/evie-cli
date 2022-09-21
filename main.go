@@ -16,11 +16,11 @@ import (
 const pagesToCheck = 3
 
 var ghMap = map[string]map[string][]string{
-	"rickypai": {
+	"evie404": {
 		"web-template": {
-			"/home/rickypai/workspace/web-template",
+			"/home/evie404/workspace/web-template",
 			"/mnt/t/workspace/web-template",
-			"/Users/rickypai/workspace/web-template",
+			"/Users/evie404/workspace/web-template",
 		},
 	},
 }
@@ -98,7 +98,7 @@ func syncPRs(client *github.Client, page int) {
 }
 
 func syncPR(pr *github.PullRequest, localDir string) {
-	if pr.GetUser().GetLogin() != "rickypai" {
+	if pr.GetUser().GetLogin() != "evie404" {
 		return
 	}
 

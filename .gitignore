@@ -17,5 +17,5 @@
 /bazel-*
 
 # Built-Binaries
-/ricky-cli
+/evie-cli
 /main

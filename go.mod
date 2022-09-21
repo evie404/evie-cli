@@ -1,4 +1,4 @@
-module github.com/rickypai/ricky-cli
+module github.com/evie404/evie-cli
 
 go 1.15
 
