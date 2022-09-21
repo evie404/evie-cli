@@ -45,14 +45,14 @@ func main() {
 		wg.Add(1)
 		go func(page int) {
 			defer wg.Done()
-			syncPRs(client, page)
+			syncPRs(client, page, ghMap)
 		}(i)
 	}
 
 	wg.Wait()
 }
 
-func syncPRs(client *github.Client, page int) {
+func syncPRs(client *github.Client, page int, repoMapping map[string]map[string][]string) {
 	ctx := context.Background()
 
 	issues, _, _ := client.Issues.List(ctx, true, &github.IssueListOptions{
@@ -74,17 +74,17 @@ func syncPRs(client *github.Client, page int) {
 
 		ownerName := *issue.Repository.Owner.Login
 
-		if _, found := ghMap[ownerName]; !found {
+		if _, found := repoMapping[ownerName]; !found {
 			continue
 		}
 
 		repoName := *issue.Repository.Name
 
-		if _, found := ghMap[ownerName][repoName]; !found {
+		if _, found := repoMapping[ownerName][repoName]; !found {
 			continue
 		}
 
-		localDirs := ghMap[ownerName][repoName]
+		localDirs := repoMapping[ownerName][repoName]
 
 		pr, _, err := client.PullRequests.Get(ctx, ownerName, repoName, *issue.Number)
 		if err != nil {
