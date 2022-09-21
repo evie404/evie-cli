@@ -25,8 +25,17 @@ var ghMap = map[string]map[string][]string{
 	},
 }
 
+var gheMap = map[string]map[string][]string{
+	"fsi": {
+		"pixie-client": {
+			"/Users/epai/workspace/fsi/pixie-client",
+		},
+	},
+}
+
 func main() {
-	syncAllPRs(githubClient(), ghMap)
+	// syncAllPRs("evie404", githubClient(), ghMap)
+	syncAllPRs("epai", gheClient(), gheMap)
 }
 
 func githubClient() *github.Client {
@@ -44,21 +53,46 @@ func githubClient() *github.Client {
 	return github.NewClient(tc)
 }
 
-func syncAllPRs(client *github.Client, repoMapping map[string]map[string][]string) {
+func gheClient() *github.Client {
+	githubToken := os.Getenv("GHE_TOKEN")
+	if githubToken == "" {
+		panic("Need to set GHE_TOKEN.")
+	}
+
+	gheURL := os.Getenv("GHE_URL")
+	if githubToken == "" {
+		panic("Need to set GHE_URL.")
+	}
+
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: githubToken},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+
+	client, err := github.NewEnterpriseClient(gheURL, gheURL, tc)
+	if err != nil {
+		panic(err)
+	}
+
+	return client
+}
+
+func syncAllPRs(username string, client *github.Client, repoMapping map[string]map[string][]string) {
 	wg := sync.WaitGroup{}
 
 	for i := 1; i <= 3; i++ {
 		wg.Add(1)
 		go func(page int) {
 			defer wg.Done()
-			syncPRs(client, page, ghMap)
+			syncPRs(username, client, page, repoMapping)
 		}(i)
 	}
 
 	wg.Wait()
 }
 
-func syncPRs(client *github.Client, page int, repoMapping map[string]map[string][]string) {
+func syncPRs(username string, client *github.Client, page int, repoMapping map[string]map[string][]string) {
 	ctx := context.Background()
 
 	issues, _, _ := client.Issues.List(ctx, true, &github.IssueListOptions{
@@ -98,13 +132,13 @@ func syncPRs(client *github.Client, page int, repoMapping map[string]map[string]
 		}
 
 		for _, localDir := range localDirs {
-			syncPR(pr, localDir)
+			syncPR(username, pr, localDir)
 		}
 	}
 }
 
-func syncPR(pr *github.PullRequest, localDir string) {
-	if pr.GetUser().GetLogin() != "evie404" {
+func syncPR(username string, pr *github.PullRequest, localDir string) {
+	if pr.GetUser().GetLogin() != username {
 		return
 	}
 
