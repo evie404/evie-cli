@@ -26,6 +26,10 @@ var ghMap = map[string]map[string][]string{
 }
 
 func main() {
+	syncAllPRs(githubClient(), ghMap)
+}
+
+func githubClient() *github.Client {
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	if githubToken == "" {
 		panic("Need to set GITHUB_TOKEN.")
@@ -37,8 +41,10 @@ func main() {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 
-	client := github.NewClient(tc)
+	return github.NewClient(tc)
+}
 
+func syncAllPRs(client *github.Client, repoMapping map[string]map[string][]string) {
 	wg := sync.WaitGroup{}
 
 	for i := 1; i <= 3; i++ {
